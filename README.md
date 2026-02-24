@@ -8,7 +8,7 @@ All skills are powered by [LinkedIn CLI](https://github.com/Linked-API/linkedin-
 
 | Skill | Description |
 |-------|-------------|
-| [linkedin-cli](linkedin-cli/) | General-purpose LinkedIn automation — fetch profiles, search people and companies, send messages, manage connections, create posts, and more |
+| [linkedin](linkedin/) | General-purpose LinkedIn automation — fetch profiles, search people and companies, send messages, manage connections, create posts, and more |
 
 ## Usage
 

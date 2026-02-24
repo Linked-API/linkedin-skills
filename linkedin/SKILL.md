@@ -1,9 +1,9 @@
 ---
-name: linkedin-cli
+name: linkedin
 description: General-purpose LinkedIn automation — fetch profiles, search people and companies, send messages, manage connections, create posts, and more. Use when the user wants to interact with LinkedIn.
 ---
 
-# LinkedIn CLI Skill
+# LinkedIn Skill
 
 You have access to `linkedin` — a CLI tool for LinkedIn automation. Use it to fetch profiles, search people and companies, send messages, manage connections, create posts, react, comment, and more.
 
