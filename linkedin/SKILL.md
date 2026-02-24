@@ -1,13 +1,13 @@
 ---
 name: linkedin
-description: General-purpose LinkedIn automation — fetch profiles, search people and companies, send messages, manage connections, create posts, and more. Use when the user wants to interact with LinkedIn.
+description: General-purpose LinkedIn automation – fetch profiles, search people and companies, send messages, manage connections, create posts, and more. Use when the user wants to interact with LinkedIn.
 ---
 
 # LinkedIn Skill
 
-You have access to `linkedin` — a CLI tool for LinkedIn automation. Use it to fetch profiles, search people and companies, send messages, manage connections, create posts, react, comment, and more.
+You have access to `linkedin` – a CLI tool for LinkedIn automation. Use it to fetch profiles, search people and companies, send messages, manage connections, create posts, react, comment, and more.
 
-Each command sends a request to Linked API, which runs a real cloud browser to perform the action on LinkedIn. Operations are **not instant** — simple ones take ~10-20 seconds, complex ones longer.
+Each command sends a request to Linked API, which runs a real cloud browser to perform the action on LinkedIn. Operations are **not instant** – simple ones take ~10-20 seconds, complex ones longer.
 
 ## Authentication
 
@@ -50,7 +50,7 @@ Error:
 {"success": false, "error": {"type": "personNotFound", "message": "Person not found"}}
 ```
 
-Exit code 0 means the API call succeeded — always check the `success` field for the action outcome. Non-zero exit codes indicate infrastructure errors (auth, network, etc.).
+Exit code 0 means the API call succeeded – always check the `success` field for the action outcome. Non-zero exit codes indicate infrastructure errors (auth, network, etc.).
 
 ## Commands
 
@@ -61,15 +61,15 @@ linkedin person fetch <url> [flags] --json -q
 ```
 
 Optional flags to include additional data:
-- `--experience` — work history
-- `--education` — education history
-- `--skills` — skills list
-- `--languages` — languages
-- `--posts` — recent posts (with `--posts-limit N`, `--posts-since TIMESTAMP`)
-- `--comments` — recent comments (with `--comments-limit N`, `--comments-since TIMESTAMP`)
-- `--reactions` — recent reactions (with `--reactions-limit N`, `--reactions-since TIMESTAMP`)
+- `--experience` – work history
+- `--education` – education history
+- `--skills` – skills list
+- `--languages` – languages
+- `--posts` – recent posts (with `--posts-limit N`, `--posts-since TIMESTAMP`)
+- `--comments` – recent comments (with `--comments-limit N`, `--comments-since TIMESTAMP`)
+- `--reactions` – recent reactions (with `--reactions-limit N`, `--reactions-since TIMESTAMP`)
 
-Only request additional data when needed — each flag increases execution time.
+Only request additional data when needed – each flag increases execution time.
 
 ```bash
 # Basic profile
@@ -113,9 +113,9 @@ linkedin company fetch <url> [flags] --json -q
 ```
 
 Optional flags:
-- `--employees` — include employees (with `--employees-limit`, `--employees-position`, `--employees-locations`, etc.)
-- `--dms` — include decision makers (with `--dms-limit`)
-- `--posts` — include company posts (with `--posts-limit`, `--posts-since`)
+- `--employees` – include employees (with `--employees-limit`, `--employees-position`, `--employees-locations`, etc.)
+- `--dms` – include decision makers (with `--dms-limit`)
+- `--posts` – include company posts (with `--posts-limit`, `--posts-since`)
 
 ```bash
 # Basic company info
@@ -272,7 +272,7 @@ linkedin reset --all                             # Remove all accounts
 ## Important Behavior
 
 - **Sequential execution.** All operations for an account run one at a time. Multiple requests queue up.
-- **Not instant.** A real browser navigates LinkedIn — expect 10-20+ seconds per operation.
+- **Not instant.** A real browser navigates LinkedIn – expect 10-20+ seconds per operation.
 - **Timestamps in UTC.** All dates and times are in UTC.
 - **Single quotes for text arguments.** Use single quotes around message text, post text, and comments to avoid shell interpretation issues with special characters.
 - **Action limits.** Per-account limits are configurable on the platform. A `limitExceeded` error means the limit was reached.
