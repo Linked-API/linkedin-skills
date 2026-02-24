@@ -11,13 +11,7 @@ Each command sends a request to Linked API, which runs a real cloud browser to p
 
 ## Authentication
 
-Before running any command, verify that an account is configured:
-
-```bash
-linkedin account list
-```
-
-If no accounts are configured, ask the user to provide their Linked API tokens. Instruct them to:
+If a command fails with exit code 2 (authentication error), ask the user to set up their account:
 
 1. Go to [app.linkedapi.io](https://app.linkedapi.io) and sign up or log in
 2. Connect their LinkedIn account
