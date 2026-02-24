@@ -11,17 +11,23 @@ Each command sends a request to Linked API, which runs a real cloud browser to p
 
 ## Authentication
 
-Before using any command, authentication must be configured:
+Before running any command, verify that an account is configured:
 
 ```bash
-# Interactive setup
-linkedin setup
-
-# Non-interactive (for scripts / CI)
-linkedin setup --linked-api-token=TOKEN --identification-token=TOKEN
+linkedin account list
 ```
 
-Tokens are obtained at [app.linkedapi.io](https://app.linkedapi.io). Run `linkedin account list` to check configured accounts.
+If no accounts are configured, ask the user to provide their Linked API tokens. Instruct them to:
+
+1. Go to [app.linkedapi.io](https://app.linkedapi.io) and sign up or log in
+2. Connect their LinkedIn account
+3. Copy the **Linked API Token** and **Identification Token** from the dashboard
+
+Once the user provides the tokens, run:
+
+```bash
+linkedin setup --linked-api-token=TOKEN --identification-token=TOKEN
+```
 
 ## Global Flags
 
