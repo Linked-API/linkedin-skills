@@ -20,19 +20,24 @@ Follow the skill's "First-run setup" section end to end:
      invites should go out (`--active-start` / `--active-end`, e.g. 09:00–18:00). If I
      have more than one account, suggest slightly different hours so they don't act at the
      exact same time.
-4. Re-run the doctor until `"ok": true`.
-5. Ask me about the retry policy: "If someone doesn't accept the request, should we try
+4. Ask me ONCE about the pace between connection requests (not per account): "By default
+   each account sends at most one connection request every 15 minutes — keep 15, or change
+   it?". Apply my answer to ALL accounts via `--min-invite-interval <N>` (pass it on each
+   `account.mjs add`, or `account.mjs update` them afterward). Tell me I can fine-tune this
+   per account later just by asking — e.g. "make kiril send one every 30 minutes".
+5. Re-run the doctor until `"ok": true`.
+6. Ask me about the retry policy: "If someone doesn't accept the request, should we try
    connecting from another account?" — then set it with
    `node scripts/settings.mjs set max_connect_attempts <1|N|all>` (default 1 = no retry).
-6. Once at least one account is registered, turn on the background scheduler with
+7. Once at least one account is registered, turn on the background scheduler with
    `node scripts/schedule.mjs install` and confirm with `node scripts/schedule.mjs status`.
 
 Then summarize in plain language: which accounts are connected, how many invites per day
-each sends and during which hours, the retry policy, and that the pipeline now runs in the
-background on its own. Do NOT mention internal scheduling details (wake-up intervals, ticks).
-Do not send any invites during setup.
+each sends, during which hours, and at what pace (one every N minutes), the retry policy, and
+that the pipeline now runs in the background on its own. Do NOT mention internal scheduling
+details (wake-up intervals, ticks). Do not send any invites during setup.
 
-7. Optionally capture my ICP now so the first import is smooth. Ask who my ideal leads are
+8. Optionally capture my ICP now so the first import is smooth. Ask who my ideal leads are
    and who to filter out — roles/seniority, industries/company types, company size/stage,
    locations to include/exclude, and any hard exclusions. Summarize it back, then save with
    `node scripts/settings.mjs set icp_definition --stdin` (pipe the agreed text in via a

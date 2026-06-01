@@ -59,7 +59,16 @@ Then re-run doctor. (Alternative: `node scripts/doctor.mjs --fix` does this auto
 
 **4. Re-run `node scripts/doctor.mjs --json` until `"ok": true`.**
 
-**5. Set the retry policy.** Ask the user: "If someone doesn't accept the request, should
+**5. Set the connection pace — ask once, apply to all accounts.** Ask the user a single
+question (not per account): "By default each account sends at most one connection request
+every 15 minutes — keep 15, or change it?". Apply their answer to every account via
+`--min-invite-interval <N>` (either pass it on each `account.mjs add`, or
+`account.mjs update --name <acct> --min-invite-interval <N>` for all afterward). Default is
+15. Let the user know they can fine-tune it per account later just by asking (e.g. "make
+kiril one every 30 minutes") — it is a per-account setting, this question just sets a common
+value for everyone.
+
+**6. Set the retry policy.** Ask the user: "If someone doesn't accept the request, should
 we try connecting from another account? (no / a specific number of accounts / all of them)".
 Then:
 
@@ -69,7 +78,7 @@ node scripts/settings.mjs set max_connect_attempts 2      # original + 1 more
 node scripts/settings.mjs set max_connect_attempts all    # every account
 ```
 
-**6. Enable the background scheduler (only after at least one account is registered):**
+**7. Enable the background scheduler (only after at least one account is registered):**
 
 ```bash
 node scripts/schedule.mjs install
@@ -77,11 +86,13 @@ node scripts/schedule.mjs install
 
 This installs one platform-native background task that keeps the pipeline running
 on its own. When talking to the user, describe it as "the pipeline now runs in the
-background and sends invites during each account's active hours" — do not expose
-ticks, intervals, or internal scheduling mechanics. See the **Phase B** and
+background and sends invites during each account's active hours" — do not expose the
+scheduler's internal wake-up frequency (the tick) or other plumbing. (The invite *pace*
+from step 5 — "one connect every N minutes" — is a real user-facing setting and fine to
+discuss; it's the tick's 5-minute heartbeat that stays hidden.) See the **Phase B** and
 **Scheduler** sections below for how it actually works.
 
-**7. Tell the user the next step and offer to do it.** Setup alone sends nothing — the
+**8. Tell the user the next step and offer to do it.** Setup alone sends nothing — the
 pipeline is empty until leads are imported. End onboarding with a concrete call to action,
 e.g.: "You're all set. To start, give me a LinkedIn or Sales Navigator search URL (or
 search filters) and a name for the list, and I'll import and qualify your first batch of
