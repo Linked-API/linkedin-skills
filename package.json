@@ -1,6 +1,6 @@
 {
   "name": "@linkedapi/skills",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "One-command installer for Linked API agent skills across Claude Code, Codex, Cursor, and Windsurf.",
   "type": "module",
   "bin": {
