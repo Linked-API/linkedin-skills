@@ -30,6 +30,10 @@ export function spinner() {
   return clack.spinner();
 }
 
+export async function multiselect(options) {
+  return unwrap(await clack.multiselect(options));
+}
+
 export async function select(options) {
   return unwrap(await clack.select(options));
 }

@@ -29,62 +29,44 @@ async function wizard(ctx) {
   );
 
   const detectedIds = snap.agents.filter((a) => a.detected).map((a) => a.id);
-  const allSkillIds = snap.skills.map((s) => s.name);
-  const defaultScope = snap.git.inRepo ? 'project' : 'global';
 
-  let agentIds;
-  let skillIds;
-  let scope;
+  // Multi-select lists are not obvious — spell out the controls once, up front.
+  prompts.note(
+    'Use ↑ / ↓ to move, Space to select, Enter to confirm.',
+    'Choosing from a list',
+  );
+  const listHint = 'space to select · enter to confirm';
 
-  // Fast path: pre-pick detected agents + all skills and confirm with one Yes/No, so the common
-  // case is just Enter — no need to know about the space key. "No" → per-item Yes/No questions.
-  let chooseManually = detectedIds.length === 0;
-  if (detectedIds.length > 0) {
-    const installAll = await prompts.confirm({
-      message: `Install ${allSkillIds.join(', ')} into ${detectedIds.join(', ')} (${defaultScope} scope)?`,
-      active: 'Yes, install all',
-      inactive: 'No, let me choose',
-      initialValue: true,
-    });
-    if (installAll) {
-      agentIds = detectedIds;
-      skillIds = allSkillIds;
-      scope = defaultScope;
-    } else {
-      chooseManually = true;
-    }
-  } else {
-    prompts.note('No supported agents detected — choose manually below.', 'Heads up');
-  }
+  const agentIds = await prompts.multiselect({
+    message: `Install into which agents? (${listHint})`,
+    options: snap.agents.map((a) => ({
+      value: a.id,
+      label: a.detected ? a.label : `${a.label} (not detected)`,
+      hint: a.nativeSkills ? undefined : 'imported as rules',
+    })),
+    initialValues: detectedIds.length ? detectedIds : [snap.agents[0].id],
+    required: true,
+  });
 
-  if (chooseManually) {
-    skillIds = await pickByConfirm(
-      snap.skills.map((s) => ({ id: s.name, message: `Install the "${s.name}" skill?`, on: true })),
-    );
-    if (skillIds.length === 0) {
-      prompts.cancel('No skills selected — nothing to do.');
-      return;
-    }
-    agentIds = await pickByConfirm(
-      snap.agents.map((a) => ({
-        id: a.id,
-        message: `Install into ${agentLabel(a)}?`,
-        on: a.detected,
-      })),
-    );
-    if (agentIds.length === 0) {
-      prompts.cancel('No agents selected — nothing to do.');
-      return;
-    }
-    scope = await prompts.select({
-      message: 'Install scope?',
-      options: [
-        { value: 'project', label: 'Project', hint: snap.git.inRepo ? 'this repository' : 'current directory' },
-        { value: 'global', label: 'Global', hint: 'all your projects (~)' },
-      ],
-      initialValue: defaultScope,
-    });
-  }
+  const skillIds = await prompts.multiselect({
+    message: `Which skills? (${listHint})`,
+    options: snap.skills.map((s) => ({ value: s.name, label: s.label, hint: s.name })),
+    initialValues: snap.skills.map((s) => s.name),
+    required: true,
+  });
+
+  const scope = await prompts.select({
+    message: 'Install scope?',
+    options: [
+      {
+        value: 'project',
+        label: 'Project',
+        hint: snap.git.inRepo ? 'this repository' : 'current directory',
+      },
+      { value: 'global', label: 'Global', hint: 'all your projects (~)' },
+    ],
+    initialValue: snap.git.inRepo ? 'project' : 'global',
+  });
 
   await ensurePrereqs(snap);
 
@@ -94,6 +76,14 @@ async function wizard(ctx) {
       message: 'Enable the network-growth background scheduler now (sends invites on a schedule)?',
       initialValue: false,
     });
+  }
+
+  const proceed = await prompts.confirm({
+    message: `Install ${skillIds.join(', ')} into ${agentIds.join(', ')} (${scope})?`,
+  });
+  if (!proceed) {
+    prompts.cancel('Aborted — nothing was changed.');
+    return;
   }
 
   const version = packageVersion();
@@ -113,20 +103,6 @@ async function wizard(ctx) {
   }
 
   prompts.outro('Done. Restart your agent — skills load at startup.');
-}
-
-function agentLabel(agent) {
-  if (agent.detected) return `${agent.label} (detected)`;
-  return agent.nativeSkills ? agent.label : `${agent.label} (imported as rules)`;
-}
-
-async function pickByConfirm(items) {
-  const chosen = [];
-  for (const item of items) {
-    const yes = await prompts.confirm({ message: item.message, initialValue: item.on });
-    if (yes) chosen.push(item.id);
-  }
-  return chosen;
 }
 
 async function ensurePrereqs(snap) {
