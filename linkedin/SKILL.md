@@ -256,6 +256,26 @@ linkedin connection list --since 2024-01-01T00:00:00Z --json -q
 linkedin connection pending --json -q
 ```
 
+#### List incoming connection requests
+
+Invitations that others have sent to you (received requests).
+
+```bash
+linkedin connection requests --json -q
+```
+
+#### Accept an incoming request
+
+```bash
+linkedin connection accept <url> --json -q
+```
+
+#### Ignore an incoming request
+
+```bash
+linkedin connection ignore <url> --json -q
+```
+
 #### Withdraw a pending request
 
 ```bash
