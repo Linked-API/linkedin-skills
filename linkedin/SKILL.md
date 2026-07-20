@@ -531,5 +531,8 @@ linkedin reset --all                             # Remove all accounts
 - **Timestamps in UTC.** All dates and times are in UTC.
 - **Single quotes for text arguments.** Use single quotes around message text, post text, and comments to avoid shell interpretation issues with special characters.
 - **Action limits.** Per-account limits are configurable on the platform. A `limitExceeded` error means the limit was reached.
+- **Trial limits.** A `trialLimitReached` error means the workspace has used its free trial
+  workflow allowance. Do not retry the workflow: ask the user to subscribe or contact support
+  for a trial extension.
 - **URL normalization.** All LinkedIn URLs in responses are normalized to `https://www.linkedin.com/...` format without trailing slashes.
 - **Null fields.** Fields that are unavailable are returned as `null` or `[]`, not omitted.
