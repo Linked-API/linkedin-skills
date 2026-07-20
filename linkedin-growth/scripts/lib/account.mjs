@@ -10,7 +10,7 @@ export function sleep(ms) {
 }
 
 export function isFatalExitCode(code) {
-  return code === 4 || code === 6;
+  return code === 3 || code === 4 || code === 6;
 }
 
 // Stores the openPersonPage completion (the action object: { actionType, success,
