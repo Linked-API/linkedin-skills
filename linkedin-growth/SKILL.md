@@ -283,10 +283,9 @@ Result classification:
   so it never hangs. Never burns a whole queue on a weekly-limit burst.
 - anything else → `status='error'`, `error_type`/`error_message` stored
 
-`linkedin-cli` exit code 3 (subscription or trial exhausted), 4 (account issue), or 6 (rate
-limit) aborts the whole run immediately — no further leads are touched. A
-`trialLimitReached` error must not be retried until the user subscribes or support extends the
-trial. Other non-zero exits mark the lead as error and continue.
+`linkedin-cli` exit code 3 (subscription or plan required), 4 (account issue), or 6 (rate limit)
+aborts the whole run immediately — no further leads are touched. Other non-zero exits mark the
+lead as error and continue.
 
 ### Pending outcomes (with cross-account retry)
 
