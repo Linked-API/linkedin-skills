@@ -383,7 +383,18 @@ linkedin stats performance --json -q
 
 # API usage for a date range
 linkedin stats usage --start 2024-01-01T00:00:00Z --end 2024-01-31T00:00:00Z --json -q
+
+# Who viewed your profile
+linkedin stats viewers --limit 50 --json -q
+
+# Only views since a moment
+linkedin stats viewers --since 2026-08-01T00:00:00Z --json -q
 ```
+
+Each viewer is either `identified` — carrying `name`, `publicUrl` and `urn` (a member URN, `null`
+when LinkedIn does not expose it) — or `anonymous`, carrying only the `description` LinkedIn showed
+and a `searchUrl` you can pass to `linkedin person search --url` to look for them. Viewers come
+newest first, and `viewedAt` is an estimate derived from the relative age LinkedIn displays.
 
 ### Sales Navigator
 
