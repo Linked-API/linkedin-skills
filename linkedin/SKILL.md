@@ -325,6 +325,7 @@ linkedin post create '<text>' [flags] --json -q
 |------|-------------|
 | `--company-url` | Post on behalf of a company page (requires admin access) |
 | `--attachments` | Attachment as `url:type` or `url:type:name`. Types: `image`, `video`, `document`. Can be specified multiple times. |
+| `--mention` | Mention as `key:name` or `key:name:identifier`, bound to `@[key]` in the text. Can be specified multiple times. |
 
 Attachment limits: up to 9 images, or 1 video, or 1 document. Cannot mix types.
 
@@ -335,9 +336,34 @@ linkedin post create 'Excited to share our latest update!' --json -q
 linkedin post create 'Our Q4 report' \
   --attachments "https://example.com/report.pdf:document:Q4 Report" --json -q
 
+# Mentioning a person
+linkedin post create 'Huge thanks to @[author] for the write-up!' \
+  --mention "author:Example Person:urn:li:member:123456789" --json -q
+
 # Post as a company
 linkedin post create 'Company announcement' \
   --company-url https://www.linkedin.com/company/name --json -q
+```
+
+#### Repost a post
+
+```bash
+linkedin post repost <url> [flags] --json -q
+```
+
+| Flag | Description |
+|------|-------------|
+| `--text` | Your own commentary (up to 3000 characters). Without it the post is reposted as is. |
+| `--mention` | Mention as `key:name` or `key:name:identifier`, bound to `@[key]` in `--text`. Can be specified multiple times. |
+
+The repost's own `postUrl` and `postUrn` come back, not those of the post you reposted. Reposting the same post twice from the same account fails with `alreadyReposted`.
+
+```bash
+linkedin post repost https://www.linkedin.com/posts/username_activity-123 --json -q
+
+# With commentary
+linkedin post repost urn:li:activity:1234567890123456789 \
+  --text 'Worth reading, especially the part on onboarding.' --json -q
 ```
 
 #### React to a post
