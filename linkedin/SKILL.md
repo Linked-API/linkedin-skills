@@ -122,6 +122,7 @@ linkedin person search [flags] --json -q
 | `--current-companies` | Comma-separated current company names |
 | `--previous-companies` | Comma-separated previous company names |
 | `--schools` | Comma-separated school names |
+| `--connection-degrees` | Comma-separated connection degrees: `1st`, `2nd`, `3rd+` |
 
 ```bash
 linkedin person search --term "product manager" --locations "San Francisco" --json -q
@@ -150,6 +151,7 @@ Employee filters (require `--employees`):
 | `--employees-locations` | Comma-separated locations |
 | `--employees-industries` | Comma-separated industries |
 | `--employees-schools` | Comma-separated school names |
+| `--employees-connection-degrees` | Comma-separated connection degrees: `1st`, `2nd`, `3rd+` |
 
 | Flag | Description |
 |------|-------------|
@@ -325,9 +327,11 @@ linkedin post create '<text>' [flags] --json -q
 |------|-------------|
 | `--company-url` | Post on behalf of a company page (requires admin access) |
 | `--attachments` | Attachment as `url:type` or `url:type:name`. Types: `image`, `video`, `document`. Can be specified multiple times. |
-| `--mention` | Mention as `key:name` or `key:name:identifier`, bound to `@[key]` in the text. Can be specified multiple times. |
+| `--mention` | One mention, bound to `@[key]` in the text. Format below. Can be specified multiple times, up to 20. |
 
 Attachment limits: up to 9 images, or 1 video, or 1 document. Cannot mix types.
+
+Mention format — write `@[key]` in the text, then describe that key with `--mention` as `key:name` or `key:name:identifier`. Everything after the second `:` is the identifier, so its own colons need no escaping. The identifier is optional and is one of `urn:li:member:<id>`, `urn:li:organization:<id>`, a hashed profile URL, or a hashed company URL; without it LinkedIn's first suggestion for `name` is used, which may not be the entity you meant. Every `@[key]` must have a matching `--mention` and vice versa, and keys cannot repeat.
 
 ```bash
 linkedin post create 'Excited to share our latest update!' --json -q
@@ -354,9 +358,11 @@ linkedin post repost <url> [flags] --json -q
 | Flag | Description |
 |------|-------------|
 | `--text` | Your own commentary (up to 3000 characters). Without it the post is reposted as is. |
-| `--mention` | Mention as `key:name` or `key:name:identifier`, bound to `@[key]` in `--text`. Can be specified multiple times. |
+| `--mention` | One mention, bound to `@[key]` in `--text`. Same format as for `post create`. Can be specified multiple times, up to 20. |
 
-The repost's own `postUrl` and `postUrn` come back, not those of the post you reposted. Reposting the same post twice from the same account fails with `alreadyReposted`.
+The repost's own `postUrl` and `postUrn` come back, not those of the post you reposted. They are empty when the repost was published but LinkedIn did not return its address — do not retry, the repost is already live.
+
+`alreadyReposted` is returned only when LinkedIn refuses an instant repost (one without `--text`). LinkedIn does not always refuse a repeat repost: a repost of your own post, or a repost with commentary, can be published again. Keep track of what you have already reposted instead of relying on this error.
 
 ```bash
 linkedin post repost https://www.linkedin.com/posts/username_activity-123 --json -q
@@ -451,6 +457,7 @@ linkedin navigator person search [flags] --json -q
 | `--previous-companies` | Comma-separated previous company names |
 | `--schools` | Comma-separated school names |
 | `--years-of-experience` | Comma-separated ranges: `lessThanOne`, `oneToTwo`, `threeToFive`, `sixToTen`, `moreThanTen` |
+| `--connection-degrees` | Comma-separated connection degrees: `1st`, `2nd`, `3rd+`, `groupMembers` |
 
 ```bash
 linkedin navigator person search --term "VP Marketing" --locations "United States" --json -q
@@ -479,6 +486,7 @@ Employee filters (require `--employees`):
 | `--employees-industries` | Comma-separated industries |
 | `--employees-schools` | Comma-separated school names |
 | `--employees-years-of-experience` | Comma-separated experience ranges |
+| `--employees-connection-degrees` | Comma-separated connection degrees: `1st`, `2nd`, `3rd+`, `groupMembers` |
 | `--dms-limit` | Max decision makers to retrieve (requires `--dms`) |
 
 ```bash
