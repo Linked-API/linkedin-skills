@@ -12,17 +12,19 @@ try {
   const out = flags.output ? String(flags.output) : null;
 
   const db = openDb({ readonly: true });
-  const where = [];
   const vals = [];
-  if (flags.account) {
-    where.push('owner_account = ?');
+  let sql = 'SELECT * FROM leads';
+  if (flags.account && flags.status) {
+    sql += ' WHERE owner_account = ? AND status = ?';
+    vals.push(String(flags.account), String(flags.status));
+  } else if (flags.account) {
+    sql += ' WHERE owner_account = ?';
     vals.push(String(flags.account));
-  }
-  if (flags.status) {
-    where.push('status = ?');
+  } else if (flags.status) {
+    sql += ' WHERE status = ?';
     vals.push(String(flags.status));
   }
-  const sql = `SELECT * FROM leads ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY created_at`;
+  sql += ' ORDER BY created_at';
   const rows = db.prepare(sql).all(...vals);
   db.close();
 
