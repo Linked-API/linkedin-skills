@@ -317,6 +317,28 @@ linkedin post fetch https://www.linkedin.com/posts/username_activity-123 \
   --comments --comments-sort mostRecent --comments-replies --json -q
 ```
 
+#### Search posts
+
+```bash
+linkedin post search [flags] --json -q
+```
+
+| Flag | Description |
+|------|-------------|
+| `--term` | Search keyword or phrase, up to 50 characters |
+| `--limit` | Max results to return, up to 100 |
+| `--from-members` | People whose posts to keep |
+| `--from-companies` | Companies whose posts to keep |
+| `--mentioning-members` | People the post must mention |
+| `--mentioning-companies` | Companies the post must mention |
+| `--author-companies` | Companies the author works at |
+
+Each actor flag is a comma-separated list. An element is `name` or `name:identifier`, where the identifier is a URN or LinkedIn URL of that person or company and pins the filter to exactly them. A name alone may match a namesake. When an entry cannot be applied, the action fails with `filterNotApplied`; correct or remove it rather than retrying.
+
+```bash
+linkedin post search --term "ai" --from-members "Bill Gates,Example Person:urn:li:member:123456789" --json -q
+```
+
 #### Create a post
 
 ```bash
