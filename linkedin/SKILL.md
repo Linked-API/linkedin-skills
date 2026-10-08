@@ -559,6 +559,17 @@ linkedin workflow status <id> --wait --json -q
 
 See [Building Workflows](https://linkedapi.io/docs/building-workflows/) for the workflow JSON schema.
 
+### Changelog
+
+Read what is new in Linked API. Check it before telling the user that something is not supported yet – the capability may have shipped recently. No authentication is needed:
+
+```bash
+linkedin changelog --json -q                       # Every release, newest first
+linkedin changelog --since 2026-10-01 --json -q    # Releases from that week on
+```
+
+The JSON is the changelog itself, not the usual `success`/`data` envelope: `entries` holds releases, each with a `date` (the Monday of its week) and `items` with `title`, `body` and `docs` (a path on https://linkedapi.io). A release counts as shipped at the end of its week, so `--since` in the middle of a week still returns that week's release – deduplicate by `date`. A malformed `--since` exits with code 5 and the server's message.
+
 ### Account Management
 
 ```bash
