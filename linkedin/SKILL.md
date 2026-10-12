@@ -200,13 +200,38 @@ Text up to 1900 characters. Wrap the message in single quotes to avoid shell int
 linkedin message send https://www.linkedin.com/in/username 'Hey, loved your latest post!' --json -q
 ```
 
+### Inbox
+
+To read messages use `inbox get`. Call `message get` only when you need a person's earlier history, and never repeat it to check for new messages.
+
+Enable inbox monitoring once per account, before sending messages whose replies you need – it captures only messages that arrive after it is on:
+
+```bash
+linkedin inbox sync --json -q          # standard inbox
+linkedin inbox sync --nv --json -q     # Sales Navigator inbox
+```
+
+New messages from everyone, with an advancing `--since`:
+
+```bash
+linkedin inbox get --since 2024-01-15T10:30:00Z --json -q
+```
+
+The whole known conversation with one person, including history loaded by `message get`:
+
+```bash
+linkedin inbox get --person https://www.linkedin.com/in/username --json -q
+```
+
+With `--person`, the output has `messages` and `threads`. Each thread has `historyComplete`: if it is `false` and you need earlier messages, run `message get <person-url>` once, then `inbox get --person` again. A hashed person URL (`personHashedUrl` from a message) always matches; a public URL matches only once Linked API knows it, so prefer the hashed URL when messages show `personPublicUrl: null`. Message times are whole minutes: to check for a reply, pass `--type` of your message and `--since` a few minutes before it, take the earliest `us` message in the result (the one you sent, not a later follow-up) and count a `them` message that is not earlier than it; if your message is not in the result yet, the reply is not known yet.
+
 ### Get Conversation
 
 ```bash
 linkedin message get <person-url> [--since TIMESTAMP] --json -q
 ```
 
-The first call for a conversation triggers a background sync and may take longer. Subsequent calls are faster.
+Loads the person's earlier history on the first call, which may take longer; subsequent calls are faster. Prefer `linkedin inbox get --person <url>` to read messages – use this only when you need history from before inbox monitoring was enabled.
 
 ```bash
 linkedin message get https://www.linkedin.com/in/username --json -q
@@ -556,6 +581,8 @@ linkedin navigator message send https://www.linkedin.com/in/username \
 ```bash
 linkedin navigator message get <person-url> [--since TIMESTAMP] --json -q
 ```
+
+Prefer `linkedin inbox get --person <url> --type nv` to read Sales Navigator messages; use this only when you need the person's earlier history.
 
 ### Custom Workflows
 
