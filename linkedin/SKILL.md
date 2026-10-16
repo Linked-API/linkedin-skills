@@ -104,6 +104,23 @@ linkedin person fetch https://www.linkedin.com/in/username --experience --educat
 linkedin person fetch https://www.linkedin.com/in/username --posts --posts-limit 5 --json -q
 ```
 
+### Endorse a Person's Skills
+
+```bash
+linkedin person endorse <url> --skill 'Project Management' --json -q
+linkedin person endorse <url> --pattern manage --pattern '^scrum$' --json -q
+linkedin person endorse <url> --all --json -q
+```
+
+Choose exactly one of `--skill`, `--pattern` or `--all`:
+- Use `--skill` for one exact skill name; letter case and extra spaces are ignored.
+- Use repeatable `--pattern` to select skills matching any of the patterns. Patterns use RE2, are case-insensitive and match anywhere in the name. Anchor with `^…$` to match a whole name. Provide 1-20 patterns, each 1-200 characters; lookaround and backreferences are unsupported.
+- Use `--all` only when the user wants every skill endorsed. It omits the patterns parameter; never send an empty patterns array.
+
+Skill names are in the profile owner's language, regardless of your own LinkedIn language. Fetch the profile with `--skills` first when you need to discover the names; a German profile may list `Projektmanagement` rather than `Project Management`.
+
+Only **1st-degree connections** can receive endorsements. An already-endorsed skill stays endorsed and counts as success. Each successful endorsement, including an existing one, counts toward the account's `stEndorsements` limit. With `--pattern` or `--all`, check every item's `success` and `error.type` in `data`: a failed skill does not stop the others, and `limitExceeded` can affect only part of the result.
+
 ### Search People
 
 ```bash
