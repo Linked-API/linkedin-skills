@@ -128,7 +128,12 @@ node scripts/import.mjs prepare \
 ```
 
 Auto-detect: if the URL contains `/sales/`, pass `--type nv`; otherwise `--type st`.
-Either `--search-url` or filter flags must be provided.
+Either `--search-url` or `--term` must be provided; filter flags alone are rejected.
+
+List flags (`--locations`, `--industries`, `--current-companies`, `--previous-companies`, `--schools`)
+take comma-separated values. When a value contains a comma itself (`Chicago, Illinois`,
+`Example Co., Ltd.`), pass the whole list as a JSON array, or it is split into separate filters:
+`--locations '["Chicago, Illinois","Denver"]'` (needs linkedin-cli 1.2.24 or newer).
 
 The script:
 1. Runs the LinkedIn search via `linkedin-cli` (workflow run for URL-based, native CLI for filters)
