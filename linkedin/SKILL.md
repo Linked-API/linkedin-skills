@@ -48,6 +48,14 @@ When using this skill, run every `linkedin ...` example below with the
 | `--no-color` | Disable colors |
 | `--account "Name"` | Use a specific account for this command |
 
+## List Flags
+
+Flags described below as comma-separated split their value on every comma. When any value contains a comma itself – a location such as `Chicago, Illinois`, an industry such as `Technology, Information and Internet`, a company such as `Example Co., Ltd.` – pass the whole list as a JSON array instead, or the value is silently split into separate filters. The JSON form needs linkedin-cli 1.2.24 or newer (`linkedin --version`; update with `npm install -g @linkedapi/linkedin-cli`):
+
+```bash
+linkedin person search --term "designer" --locations '["Chicago, Illinois","London, United Kingdom"]' --json -q
+```
+
 ## Output Format
 
 Success:
@@ -129,7 +137,8 @@ linkedin person search [flags] --json -q
 
 | Flag | Description |
 |------|-------------|
-| `--term` | Search keyword or phrase |
+| `--term` | Search keyword or phrase; required unless `--url` is given |
+| `--url` | LinkedIn people search URL (`linkedin.com/search/results/people/...`), such as an anonymous viewer's `searchUrl`; overrides `--term` and the filters |
 | `--limit` | Max results |
 | `--first-name` | Filter by first name |
 | `--last-name` | Filter by last name |
@@ -143,7 +152,8 @@ linkedin person search [flags] --json -q
 
 ```bash
 linkedin person search --term "product manager" --locations "San Francisco" --json -q
-linkedin person search --current-companies "Google" --position "Engineer" --limit 20 --json -q
+linkedin person search --term "engineer" --current-companies "Google" --limit 20 --json -q
+linkedin person search --url "https://www.linkedin.com/search/results/people/?keywords=CTO" --json -q
 ```
 
 ### Fetch a Company
@@ -195,7 +205,8 @@ linkedin company search [flags] --json -q
 
 | Flag | Description |
 |------|-------------|
-| `--term` | Search keyword |
+| `--term` | Search keyword; required unless `--url` is given |
+| `--url` | LinkedIn companies search URL (`linkedin.com/search/results/companies/...`); overrides `--term` and the filters |
 | `--limit` | Max results |
 | `--sizes` | Comma-separated sizes: `1-10`, `11-50`, `51-200`, `201-500`, `501-1000`, `1001-5000`, `5001-10000`, `10001+` |
 | `--locations` | Comma-separated locations |
@@ -489,7 +500,7 @@ linkedin stats viewers --since 2026-08-01T00:00:00Z --json -q
 
 Each viewer is either `identified` — carrying `name`, `publicUrl` and `urn` (a member URN, `null`
 when LinkedIn does not expose it) — or `anonymous`, carrying only the `description` LinkedIn showed
-and a `searchUrl` you can pass to `linkedin person search --url` to look for them. Viewers come
+and a `searchUrl` you can pass to `linkedin person search --url` (linkedin-cli 1.2.24 or newer) to look for them. Viewers come
 newest first, and `viewedAt` is an estimate derived from the relative age LinkedIn displays.
 
 ### Sales Navigator
@@ -510,7 +521,8 @@ linkedin navigator person search [flags] --json -q
 
 | Flag | Description |
 |------|-------------|
-| `--term` | Search keyword or phrase |
+| `--term` | Search keyword or phrase; required unless `--url` is given |
+| `--url` | Sales Navigator people search URL (`linkedin.com/sales/search/people/...`); overrides `--term` and the filters |
 | `--limit` | Max results |
 | `--first-name` | Filter by first name |
 | `--last-name` | Filter by last name |
@@ -525,7 +537,7 @@ linkedin navigator person search [flags] --json -q
 
 ```bash
 linkedin navigator person search --term "VP Marketing" --locations "United States" --json -q
-linkedin navigator person search --years-of-experience "moreThanTen" --position "CEO" --json -q
+linkedin navigator person search --term "CEO" --years-of-experience "moreThanTen" --json -q
 ```
 
 #### Fetch company
@@ -567,7 +579,8 @@ linkedin navigator company search [flags] --json -q
 
 | Flag | Description |
 |------|-------------|
-| `--term` | Search keyword |
+| `--term` | Search keyword; required unless `--url` is given |
+| `--url` | Sales Navigator companies search URL (`linkedin.com/sales/search/company/...`); overrides `--term` and the filters |
 | `--limit` | Max results |
 | `--sizes` | Comma-separated sizes: `1-10`, `11-50`, `51-200`, `201-500`, `501-1000`, `1001-5000`, `5001-10000`, `10001+` |
 | `--locations` | Comma-separated locations |
@@ -577,7 +590,7 @@ linkedin navigator company search [flags] --json -q
 
 ```bash
 linkedin navigator company search --term "fintech" --sizes "11-50,51-200" --json -q
-linkedin navigator company search --revenue-min 10 --revenue-max 100 --locations "United States" --json -q
+linkedin navigator company search --term "logistics" --revenue-min 10 --revenue-max 100 --locations "United States" --json -q
 ```
 
 #### Send InMail
