@@ -505,12 +505,12 @@ newest first, and `viewedAt` is an estimate derived from the relative age Linked
 
 ### Sales Navigator
 
-Requires a LinkedIn Sales Navigator subscription. Uses hashed URLs for person/company lookups.
+Requires a LinkedIn Sales Navigator subscription. Person and company lookups accept public or hashed LinkedIn URLs.
 
 #### Fetch person
 
 ```bash
-linkedin navigator person fetch <hashed-url> --json -q
+linkedin navigator person fetch <url> --json -q
 ```
 
 #### Search people
@@ -543,7 +543,7 @@ linkedin navigator person search --term "CEO" --years-of-experience "moreThanTen
 #### Fetch company
 
 ```bash
-linkedin navigator company fetch <hashed-url> [flags] --json -q
+linkedin navigator company fetch <url> [flags] --json -q
 ```
 
 Optional flags:
@@ -613,6 +613,38 @@ linkedin navigator message get <person-url> [--since TIMESTAMP] --json -q
 ```
 
 Prefer `linkedin inbox get --person <url> --type nv` to read Sales Navigator messages; use this only when you need the person's earlier history.
+
+### Sales Navigator saved leads, accounts, lists and searches
+
+These commands need linkedin-cli 1.2.26 or newer (`linkedin --version`; update with `npm install -g @linkedapi/linkedin-cli`).
+
+Plus plan required. Saving, unsaving, creating, renaming and deleting lists, removing list members, and creating or deleting saved searches currently require the English Sales Navigator interface. Reading alerts, lists, list members and saved searches works in every supported interface language. IDs are strings.
+
+```bash
+linkedin navigator alerts --limit 50 --sort latest --json -q
+linkedin navigator alerts --list-id <list-id> --json -q
+linkedin navigator alerts --subject '<hashed-url-or-subject-urn>' --subject '<another-identity>' --json -q
+linkedin navigator person save <url> [--list-id <list-id>] --json -q
+linkedin navigator person unsave <url> --json -q
+linkedin navigator company save <url> [--list-id <list-id>] --json -q
+linkedin navigator company unsave <url> --json -q
+linkedin navigator lists --type <lead|account> --json -q
+linkedin navigator lists create --type <lead|account> --name 'Prospects' [--description 'Notes'] --json -q
+linkedin navigator lists delete <list-id> --json -q
+linkedin navigator lists leads <list-id> [--limit 25] --json -q
+linkedin navigator lists accounts <list-id> [--limit 25] --json -q
+linkedin navigator person remove-from-list <url> --list-id <list-id> --json -q
+linkedin navigator company remove-from-list <url> --list-id <list-id> --json -q
+linkedin navigator lists rename <list-id> --name 'New name' --json -q
+linkedin navigator saved-searches --type <lead|account> --json -q
+linkedin navigator saved-searches create '<search-url>' --type <lead|account> --json -q
+linkedin navigator saved-searches delete <saved-search-id> --json -q
+```
+
+Alerts also accept `--category lead|account`, `--types` (comma-separated or a JSON array), `--since` (inclusive ISO timestamp), and `--exclude-suggested`. `--subject` is repeatable: each occurrence is exactly one recognised hashed LinkedIn URL or Sales Navigator subject URN. These identities can contain commas, so never split them or pass a JSON array. An empty subject list is unrestricted. Subjects are ORed; the other filters are ANDed. Public URL handles cannot identify subjects for this filter. `--list-id` requires `--sort latest`.
+
+List-member limits are 1–1000 (default 25). Removing membership keeps the subject saved and in other lists; removing an absent membership succeeds. Unsave removes the saved state and all memberships. Deleting a list keeps its members saved. Rename trims its name (1–75 characters, no line breaks), returns `listAlreadyExists` for a duplicate and `listNotRenamable` for system lists. Saved searches require a copied `/sales/search/people` (lead) or `/sales/search/company` (account) URL matching `--type`; deleted or foreign IDs return `savedSearchNotFound`.
+
 
 ### Custom Workflows
 
