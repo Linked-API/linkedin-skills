@@ -618,7 +618,7 @@ Prefer `linkedin inbox get --person <url> --type nv` to read Sales Navigator mes
 
 These commands need linkedin-cli 1.2.26 or newer (`linkedin --version`; update with `npm install -g @linkedapi/linkedin-cli`).
 
-Plus plan required. Saving, unsaving, creating, renaming and deleting lists, removing list members, and creating or deleting saved searches currently require the English Sales Navigator interface. Reading alerts, lists, list members and saved searches works in every supported interface language. IDs are strings.
+Plus plan required. IDs are strings.
 
 ```bash
 linkedin navigator alerts --limit 50 --sort latest --json -q
@@ -637,13 +637,13 @@ linkedin navigator person remove-from-list <url> --list-id <list-id> --json -q
 linkedin navigator company remove-from-list <url> --list-id <list-id> --json -q
 linkedin navigator lists rename <list-id> --name 'New name' --json -q
 linkedin navigator saved-searches --type <lead|account> --json -q
-linkedin navigator saved-searches create '<search-url>' --type <lead|account> --json -q
+linkedin navigator saved-searches create '<search-url>' --type <lead|account> [--name 'Heads of Sales'] --json -q
 linkedin navigator saved-searches delete <saved-search-id> --json -q
 ```
 
 Alerts also accept `--category lead|account`, `--types` (comma-separated or a JSON array), `--since` (inclusive ISO timestamp), and `--exclude-suggested`. `--subject` is repeatable: each occurrence is exactly one recognised hashed LinkedIn URL or Sales Navigator subject URN. These identities can contain commas, so never split them or pass a JSON array. An empty subject list is unrestricted. Subjects are ORed; the other filters are ANDed. Public URL handles cannot identify subjects for this filter. `--list-id` requires `--sort latest`.
 
-List-member limits are 1–1000 (default 25). Removing membership keeps the subject saved and in other lists; removing an absent membership succeeds. Unsave removes the saved state and all memberships. Deleting a list keeps its members saved. Rename trims its name (1–75 characters, no line breaks), returns `listAlreadyExists` for a duplicate and `listNotRenamable` for system lists. Saved searches require a copied `/sales/search/people` (lead) or `/sales/search/company` (account) URL matching `--type`; deleted or foreign IDs return `savedSearchNotFound`.
+List-member limits are 1–1000 (default 25). Removing membership keeps the subject saved and in other lists; removing an absent membership succeeds. Unsave removes the saved state and all memberships. Deleting a list keeps its members saved. Rename trims its name (1–75 characters, no line breaks), returns `listAlreadyExists` for a duplicate and `listNotRenamable` for system lists. Saved searches require a copied `/sales/search/people` (lead) or `/sales/search/company` (account) URL matching `--type`; `--name` (trimmed, 1–256 characters, one line) renames the new search; without it Sales Navigator names it, e.g. by its keywords. A name already used by a saved search of the same type returns `savedSearchAlreadyExists`, a full catalog `savedSearchLimitReached`; `savedSearchRenameUnconfirmed` means the search was saved under Sales Navigator's name and kept. Deleted or foreign IDs return `savedSearchNotFound`.
 
 
 ### Custom Workflows
