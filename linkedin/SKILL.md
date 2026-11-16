@@ -646,6 +646,74 @@ Alerts also accept `--category lead|account`, `--types` (comma-separated or a JS
 List-member limits are 1–1000 (default 25). Removing membership keeps the subject saved and in other lists; removing an absent membership succeeds. Unsave removes the saved state and all memberships. Deleting a list keeps its members saved. Rename trims its name (1–75 characters, no line breaks), returns `listAlreadyExists` for a duplicate and `listNotRenamable` for system lists. Saved searches require a copied `/sales/search/people` (lead) or `/sales/search/company` (account) URL matching `--type`; `--name` (trimmed, 1–256 characters, one line) renames the new search; without it Sales Navigator names it, e.g. by its keywords. A name already used by a saved search of the same type returns `savedSearchAlreadyExists`, a full catalog `savedSearchLimitReached`; `savedSearchRenameUnconfirmed` means the search was saved under Sales Navigator's name and kept. Deleted or foreign IDs return `savedSearchNotFound`.
 
 
+### Recruiter Lite
+
+Requires a LinkedIn Recruiter Lite seat and Linked API's Plus plan. These commands need linkedin-cli 1.3.0 or newer (`linkedin --version`; update with `npm install -g @linkedapi/linkedin-cli`). Keep only one Recruiter session open for the account. Use Recruiter profile URLs (`https://www.linkedin.com/talent/profile/…`), never public `/in/…` URLs. Project IDs are strings.
+
+```bash
+linkedin recruiter person search [--term <text>] [--url <search-url>] [--limit 25] [filters] --json -q
+linkedin recruiter person fetch <url> [--no-basic-info] [--recruiting-activity] --json -q
+linkedin recruiter projects [--limit 25] --json -q
+linkedin recruiter projects candidates <project-id> [--stage <stage>] [--limit 25] --json -q
+linkedin recruiter person save <url> --project-id <project-id> --json -q
+linkedin recruiter projects create --name "Project name" --json -q
+linkedin recruiter projects rename <project-id> --name "New name" [--description "Description"] --json -q
+linkedin recruiter projects archive <project-id> --json -q
+linkedin recruiter message send <person-url> "Text" --subject "Subject" --json -q
+linkedin recruiter message send --thread-id <thread-id> "Reply text" --json -q
+linkedin inbox sync --rc --json -q
+linkedin inbox get --type rc --json -q
+linkedin inbox get --type rc --person <recruiter-url> --json -q
+```
+
+Search accepts a nonblank `--term`, filters alone, or `--url` copied from a Recruiter search (`https://www.linkedin.com/talent/search?…`). `--url` is exclusive with `--term` and every filter flag. A scope selector or false checkbox alone is not search criteria. Search, project and candidate limits are 1–1000, default 25. Candidate stage is `uncontacted`, `contacted`, `replied` or `archived`; omit it to read all stages. Fetch reads basic information by default; `--no-basic-info` turns it off (`--basic-info` turns it on). Recruiting activity defaults off; use `--recruiting-activity` or `--no-recruiting-activity`.
+
+Filter lists are comma-separated or a JSON array of strings when a value contains commas, following List Flags above.
+
+| Flag | Filter / values |
+| --- | --- |
+| `--job-titles <list>` | `jobTitles` — String list |
+| `--job-titles-scope <scope>` | `jobTitlesScope` — Title/company scope below |
+| `--locations <list>` | `locations` — String list |
+| `--locations-scope <scope>` | `locationsScope` — Location scope below |
+| `--postal-code <code>` and `--postal-code-radius-miles <miles>` | `postalCode` — `code` required when postal filter is present; radius optional: 1, 5, 10, 25, 50, 100, 200 |
+| `--skills <list>` | `skills` — String list |
+| `--has-passed-skill-assessment` / `--no-has-passed-skill-assessment` | `hasPassedSkillAssessment` — Boolean |
+| `--companies <list>` | `companies` — String list |
+| `--companies-scope <scope>` | `companiesScope` — Title/company scope below |
+| `--current-companies <list>` | `currentCompanies` — String list |
+| `--past-companies <list>` | `pastCompanies` — String list; intentionally `pastCompanies`, not NV's `previousCompanies` |
+| `--company-sizes <list>` | `companySizes` — Company-size enum list below |
+| `--schools <list>` | `schools` — String list |
+| `--graduation-years-from <year>`, `--graduation-years-to <year>` | `graduationYears` — Integer range, 1900–2100; either bound or both |
+| `--industries <list>` | `industries` — String list |
+| `--job-functions <list>` | `jobFunctions` — Job-function enum list below |
+| `--seniority <list>` | `seniority` — Seniority enum list below |
+| `--years-of-experience-from <years>`, `--years-of-experience-to <years>` | `yearsOfExperience` — Integer range, 0–30; either bound or both; zero is preserved |
+| `--first-names <list>` | `firstNames` — String list; plural unlike NV's scalar `firstName` |
+| `--last-names <list>` | `lastNames` — String list; plural unlike NV's scalar `lastName` |
+| `--profile-languages <list>` | `profileLanguages` — LinkedIn language codes, e.g. `en`, `es`, `in` (Indonesian), `_o` (Other); never language names |
+| `--recently-joined <list>` | `recentlyJoined` — Recently-joined enum list below |
+| `--network-relationships <list>` | `networkRelationships` — `1st`, `2nd`, `groupMembers`, `3rd+` |
+| `--is-military-veteran` / `--no-is-military-veteran` | `isMilitaryVeteran` — Boolean |
+| `--groups <list>` | `groups` — String list |
+| `--recruiting-activity-type <type>`, `--recruiting-activity-period <period>` | `recruitingActivity` — Type required when activity filter is present; period optional; enums below |
+| `--projects <list>` | `projects` — Project names, not project IDs |
+| `--notes <list>` | `notes` — String list |
+| `--hide-previously-viewed` / `--no-hide-previously-viewed` | `hidePreviouslyViewed` — Boolean |
+
+Title/company scopes: `currentOrPast`, `current`, `pastNotCurrent`, `past`. Location scopes: `current`, `currentOrOpenToRelocate`, `openToRelocateOnly`. Company sizes: `selfEmployed`, `1-10`, `11-50`, `51-200`, `201-500`, `501-1000`, `1001-5000`, `5001-10000`, `10001+`. Seniority: `unpaid`, `training`, `entry`, `senior`, `manager`, `director`, `vp`, `cxo`, `partner`, `owner`. Recently joined: `1day`, `2to7days`, `8to14days`, `15to30days`, `1to3months`. Recruiting activity types: `messages`, `notes`, `projects`, `resumes`, `reviews`; periods: `anytime`, `pastDay`, `pastWeek`, `pastTwoWeeks`, `pastThreeMonths`, `pastSixMonths`, `pastYear`, `pastTwoYears`. Job functions use the exact choices shown by `linkedin recruiter person search --help`.
+
+Boolean filter flags accept `--no-…` to leave the checkbox off; this is not an inverse filter. Ranges accept either bound or both and require `from <= to`; preserve 0 years of experience. A radius needs `--postal-code`; an activity period needs `--recruiting-activity-type`.
+
+Project names are 1–100 characters on one line. Description allows up to 2000 characters; omit it to leave unchanged. Create sets only the name. Creation is not idempotent: after a failure, check your projects before creating again (a duplicate can only be archived). Archive keeps the project rather than deleting it.
+
+New InMail requires a person URL, subject (1–200 characters, one line), and text (1–1900 characters). A reply uses `--thread-id` and text only: no person URL and no subject. Paid InMail is disabled by default. `--allow-paid-credit` explicitly enables it; a paid InMail credit is spent only when this flag is true. Turn on --allow-paid-credit only when the user has explicitly approved spending a paid InMail credit on this message; on inMailCreditRequired, ask the user instead of retrying with --allow-paid-credit on. Never retry a send automatically. After an `unexpectedError`, check the conversation before sending again.
+
+Enable Recruiter inbox monitoring once with `inbox sync --rc` (exclusive with `--nv`). Only messages arriving after monitoring is enabled are captured. Use `inbox get --type rc` with an advancing `--since`. Recruiter messages identify the person with `personRecruiterUrl`; `personHashedUrl`, `personUrn` and deprecated `personUrl` are null. `personRecruiterUrl` is nullable on other types. A Recruiter profile URL works with `--person`. Omitting `--type` returns all inbox types.
+
+For `rc.doForPeople`, use `linkedin workflow run` with a custom workflow; it has no dedicated command.
+
 ### Custom Workflows
 
 Execute a custom workflow definition from a file, stdin, or inline:
