@@ -266,6 +266,44 @@ linkedin message get https://www.linkedin.com/in/username --json -q
 linkedin message get https://www.linkedin.com/in/username --since 2024-01-15T10:30:00Z --json -q
 ```
 
+### Signals
+
+These commands need linkedin-cli 1.4.0 or newer (`linkedin --version`; update with `npm install -g @linkedapi/linkedin-cli`).
+
+A signal makes the account watch one thing on LinkedIn on a schedule and record each new item once as an event. When the user wants to keep track of something over time – new posts by a person or company, new posts on a topic, new comments and reactions on a post, new profile viewers, connection changes – create a signal instead of re-running searches or fetches: a rerun spends limits every time and returns what you have already seen, while a signal reports only what is new.
+
+| `--type` | Target flags | Reports |
+|---|---|---|
+| `personPosts` | `--person-url` | new posts by the person |
+| `companyPosts` | `--company-url` | new posts by the company page |
+| `postSearch` | `--term` (repeat for up to 3 phrases), optional filters as in `post search` (`--content-type`, `--posted-by`, `--mentioning-members`, `--mentioning-companies`, `--author-companies`, `--author-industries`) | new posts matching any phrase |
+| `postEngagement` | `--post-url`, or `--my-posts` for the account's own posts | new comments and reactions |
+| `profileViewers` | none | new profile viewers |
+| `network` | none | accepted invitations, new connections, received invitations |
+
+```bash
+linkedin signal create --type personPosts --person-url https://www.linkedin.com/in/username --label lead-1042 --json -q
+linkedin signal create --type postSearch --term 'user onboarding' --term 'time to value' --json -q
+linkedin signal create --type postEngagement --my-posts --json -q
+linkedin signal list --status active --json -q
+linkedin signal pause <signal-id> --json -q     # not checked and spends nothing until resumed
+linkedin signal resume <signal-id> --json -q    # its first check reports what appeared while paused
+linkedin signal delete <signal-id> --json -q    # checks stop; its events stay available for 90 days
+```
+
+`--label` is your own identifier (up to 64 characters), returned with the signal and every event it produces. Creating a signal that already exists returns it. A signal's first check records a silent baseline: what is already there is not reported, except that post signals report posts published since the signal was created. A `stopped` signal cannot be resumed – delete it and create it again. `signalLimitReached` (exit code 5) means the account already has the maximum number of active signals of that type: pause or delete one first.
+
+Read events with an advancing `--since` – the `detectedAt` of the newest event you already have – and handle each event once by its `id`, skipping ids you have already processed:
+
+```bash
+linkedin signal events --since 2026-10-12T16:40:00.000Z --json -q
+linkedin signal events --since 2026-10-12T16:40:00.000Z --signal-id <signal-id> --json -q
+```
+
+Always pass `--since`: without it every event of the last 90 days comes back, which can be very large. `--signal-type` and `--event-type` narrow the result further.
+
+What checks spend: `network`, `profileViewers` and `postEngagement` take nothing from account limits; each `postSearch` check spends 1 of `stSearchQueries`, so put the wordings of one topic into one signal as several `--term`s; `personPosts` and `companyPosts` open the profile or company page once, then take a few `stSearchQueries` a day for the whole account and an occasional visit.
+
 ### Connection Management
 
 #### Check connection status
