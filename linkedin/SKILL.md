@@ -268,9 +268,9 @@ linkedin message get https://www.linkedin.com/in/username --since 2024-01-15T10:
 
 ### Signals
 
-These commands need linkedin-cli 1.4.0 or newer (`linkedin --version`; update with `npm install -g @linkedapi/linkedin-cli`).
+These commands need linkedin-cli 1.4.0 or newer, and `listAlerts` needs 1.4.1 or newer (`linkedin --version`; update with `npm install -g @linkedapi/linkedin-cli`).
 
-A signal makes the account watch one thing on LinkedIn on a schedule and record each new item once as an event. When the user wants to keep track of something over time – new posts by a person or company, new posts on a topic, new comments and reactions on a post, new profile viewers, connection changes – create a signal instead of re-running searches or fetches: a rerun spends limits every time and returns what you have already seen, while a signal reports only what is new.
+A signal makes the account watch one thing on LinkedIn on a schedule and record each new item once as an event. When the user wants to keep track of something over time – new posts by a person or company, new posts on a topic, new comments and reactions on a post, new profile viewers, connection changes, Sales Navigator alerts about the leads and accounts in a list – create a signal instead of re-running searches or fetches: a rerun spends limits every time and returns what you have already seen, while a signal reports only what is new.
 
 | `--type` | Target flags | Reports |
 |---|---|---|
@@ -280,18 +280,20 @@ A signal makes the account watch one thing on LinkedIn on a schedule and record 
 | `postEngagement` | `--post-url`, or `--my-posts` for the account's own posts | new comments and reactions |
 | `profileViewers` | none | new profile viewers |
 | `network` | none | accepted invitations, new connections, received invitations |
+| `listAlerts` | `--list-id` of one of the account's own Sales Navigator lists (from `navigator lists`) | new Sales Navigator alerts about the list's leads and accounts |
 
 ```bash
 linkedin signal create --type personPosts --person-url https://www.linkedin.com/in/username --label lead-1042 --json -q
 linkedin signal create --type postSearch --term 'user onboarding' --term 'time to value' --json -q
 linkedin signal create --type postEngagement --my-posts --json -q
+linkedin signal create --type listAlerts --list-id <list-id> --json -q
 linkedin signal list --status active --json -q
 linkedin signal pause <signal-id> --json -q     # not checked and spends nothing until resumed
 linkedin signal resume <signal-id> --json -q    # its first check reports what appeared while paused
 linkedin signal delete <signal-id> --json -q    # checks stop; its events stay available for 90 days
 ```
 
-`--label` is your own identifier (up to 64 characters), returned with the signal and every event it produces. Creating a signal that already exists returns it. A signal's first check records a silent baseline: what is already there is not reported, except that post signals report posts published since the signal was created. A `stopped` signal cannot be resumed – delete it and create it again. `signalLimitReached` (exit code 5) means the account already has the maximum number of active signals of that type: pause or delete one first.
+`--label` is your own identifier (up to 64 characters), returned with the signal and every event it produces. Creating a signal that already exists returns it. A signal's first check records a silent baseline: what is already there is not reported, except that post signals report posts published since the signal was created and `listAlerts` reports alerts published since then. A `stopped` signal cannot be resumed – delete it and create it again. `signalLimitReached` (exit code 5) means the account already has the maximum number of active signals of that type: pause or delete one first.
 
 Read events with an advancing `--since` – the `detectedAt` of the newest event you already have – and handle each event once by its `id`, skipping ids you have already processed:
 
@@ -302,7 +304,9 @@ linkedin signal events --since 2026-10-12T16:40:00.000Z --signal-id <signal-id> 
 
 Always pass `--since`: without it every event of the last 90 days comes back, which can be very large. `--signal-type` and `--event-type` narrow the result further.
 
-What checks spend: `network`, `profileViewers` and `postEngagement` take nothing from account limits; each `postSearch` check spends 1 of `stSearchQueries`, so put the wordings of one topic into one signal as several `--term`s; `personPosts` and `companyPosts` open the profile or company page once, then take a few `stSearchQueries` a day for the whole account and an occasional visit.
+A `listAlerts` event (`alertPublished`) carries `alert`, exactly as `navigator alerts` returns it, plus `subjectUrn` and `subjectHashedUrl`: the lead's or account's `urn` and `hashedUrl` as `navigator lists leads` and `navigator lists accounts` return them, so match events to list members by those. LinkedIn chooses which activity raises an alert and publishes it hours later, so this is not a record of everything the members do. Watch a list the user built: lists Sales Navigator fills on its own with people the account never saved get only occasional suggested alerts. It needs an active Sales Navigator subscription (otherwise it stops with `noSalesNavigator`), and very large lists are not supported yet (`listTooLarge`); a list that is not one of the account's own, or was deleted, stops it with `targetNotFound`.
+
+What checks spend: `network`, `profileViewers`, `postEngagement` and `listAlerts` take nothing from account limits; each `postSearch` check spends 1 of `stSearchQueries`, so put the wordings of one topic into one signal as several `--term`s; `personPosts` and `companyPosts` open the profile or company page once, then take a few `stSearchQueries` a day for the whole account and an occasional visit.
 
 ### Connection Management
 
@@ -679,7 +683,7 @@ linkedin navigator saved-searches create '<search-url>' --type <lead|account> [-
 linkedin navigator saved-searches delete <saved-search-id> --json -q
 ```
 
-Alerts also accept `--category lead|account`, `--types` (comma-separated or a JSON array), `--since` (inclusive ISO timestamp), and `--exclude-suggested`. `--subject` is repeatable: each occurrence is exactly one recognised hashed LinkedIn URL or Sales Navigator subject URN. These identities can contain commas, so never split them or pass a JSON array. An empty subject list is unrestricted. Subjects are ORed; the other filters are ANDed. Public URL handles cannot identify subjects for this filter. `--list-id` requires `--sort latest`.
+Alerts also accept `--category lead|account`, `--types` (comma-separated or a JSON array), `--since` (inclusive ISO timestamp), and `--exclude-suggested`. `--subject` is repeatable: each occurrence is exactly one recognised hashed LinkedIn URL, Sales Navigator subject URN, or `urn:li:member:<id>` / `urn:li:organization:<id>` as `navigator lists leads` and `navigator lists accounts` return it in `urn` (these two forms need linkedin-cli 1.4.1 or newer). These identities can contain commas, so never split them or pass a JSON array. An empty subject list is unrestricted. Subjects are ORed; the other filters are ANDed. Public URL handles cannot identify subjects for this filter. `--list-id` requires `--sort latest`.
 
 List-member limits are 1–1000 (default 25). Removing membership keeps the subject saved and in other lists; removing an absent membership succeeds. Unsave removes the saved state and all memberships. Deleting a list keeps its members saved. Rename trims its name (1–75 characters, no line breaks), returns `listAlreadyExists` for a duplicate and `listNotRenamable` for system lists. Saved searches require a copied `/sales/search/people` (lead) or `/sales/search/company` (account) URL matching `--type`; `--name` (trimmed, 1–256 characters, one line) renames the new search; without it Sales Navigator names it, e.g. by its keywords. A name already used by a saved search of the same type returns `savedSearchAlreadyExists`, a full catalog `savedSearchLimitReached`; `savedSearchRenameUnconfirmed` means the search was saved under Sales Navigator's name and kept. Deleted or foreign IDs return `savedSearchNotFound`.
 
